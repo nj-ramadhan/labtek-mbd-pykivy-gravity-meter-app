@@ -1,0 +1,64 @@
+#:kivy 2.1.0
+
+#:import NoTransition kivy.uix.screenmanager.NoTransition
+#:include screen_splash.kv
+#:include screen_standby.kv
+#:include screen_choose_product.kv
+#:include screen_choose_payment.kv
+#:include screen_info.kv
+#:include screen_operate.kv
+#:include screen_maintenance.kv
+#:include screen_qr_payment.kv
+#:include screen_scan_qr.kv
+
+
+# ScreenManager:
+<RootScreen>:
+    id: screen_manager
+    transition: NoTransition()
+
+    ScreenSplash:
+        id: screen_home
+        name: 'screen_splash'
+        screen_manager: screen_manager
+
+    ScreenStandby:
+        id: screen_standby
+        name: 'screen_standby'
+        screen_manager: screen_manager
+
+    ScreenChooseProduct:
+        id: screen_choose_product
+        name: 'screen_choose_product'
+        screen_manager: screen_manager
+
+    ScreenChoosePayment:
+        id: screen_choose_payment
+        name: 'screen_choose_payment'
+        screen_manager: screen_manager
+
+    ScreenQRPayment:
+        id: screen_qr_payment
+        name: 'screen_qr_payment'
+        screen_manager: screen_manager  
+            
+    ScreenOperate:
+        id: screen_operate
+        name: 'screen_operate'
+        screen_manager: screen_manager
+
+    ScreenInfo:
+        id: screen_info
+        name: 'screen_info'
+        screen_manager: screen_manager
+
+    ScreenMaintenance:
+        id: screen_maintenance
+        name: 'screen_maintenance'
+        screen_manager: screen_manager                  
+
+    ScreenScanQr:
+        id: screen_scan_qr
+        name: 'screen_scan_qr'
+        screen_manager: screen_manager                  
+
