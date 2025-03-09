@@ -48,62 +48,91 @@
 			orientation: "vertical"
 			md_bg_color: app.theme_cls.accent_color
 			size_hint: 1, 0.75
-			padding:10
-			spacing:10
+			padding:50
+			spacing:20
 
-	MDRelativeLayout:
-		MDFillRoundFlatIconButton:
-			id: bt_up
-			icon: "home"
-			text: "HOME"
-			font_size: 28
-			size_hint: 0.2, 0.1
-			pos_hint: {"center_x": .15, "center_y": .60}
-			on_press: root.act_home()
+			MDBoxLayout:
+				orientation: 'horizontal'
+				size_hint: 1, 0.1
+				spacing: 20
 
-		MDFillRoundFlatIconButton:
-			id: bt_up
-			icon: "arrow-up"
-			text: "UP"
-			font_size: 28
-			size_hint: 0.2, 0.1
-			pos_hint: {"center_x": .15, "center_y": .40}
-			on_press: root.act_up()
-			on_release: root.act_stop()
+				MDLabel:
+					text: "Select COM Port:"
+					size_hint_x: 0.7
 
-		MDFillRoundFlatIconButton:
-			id: bt_down
-			icon: "arrow-down"
-			text: "DOWN"
-			font_size: 28
-			size_hint: 0.2, 0.1
-			pos_hint: {"center_x": .15, "center_y": .20}
-			on_press: root.act_down()
-			on_release: root.act_stop()
+				MDRaisedButton:
+					id: com_port_button
+					text: "Select COM Port"
+					size_hint_x: 0.3
+					on_release: root.open_com_port_menu()
 
-		MDTextField:
-			id: tx_field
-			hint_text: "Masukkan Posisi yang Dituju"
-			text: "0.0"
-			font_size: 200
-			size_hint: 0.4, 0.3
-			input_filter: 'float'
-			on_text_validate: root.act_start()
-			pos_hint: {"center_x": .7, "center_y": .50}			
+			MDBoxLayout:
+				orientation: 'horizontal'
+				size_hint: 1, 0.9
+				padding: 50
 
-		MDFillRoundFlatIconButton:
-			id: bt_start
-			icon: "play"
-			text: "START"
-			font_size: 28
-			size_hint: 0.2, 0.1
-			pos_hint: {"center_x": .85, "center_y": .20}
-			on_press: root.act_start()
+				MDBoxLayout:
+					orientation: 'vertical'
+					size_hint_x: 0.5
+					padding: 50
+					spacing: 20
 
-		MDLabel:
-			text: "mm"
-			font_size: 100
-			size_hint: 0.1, 0.3
-			pos_hint: {"center_x": .9, "center_y": .50}
-			theme_text_color: "Custom"
-			text_color: app.theme_cls.primary_color
+					MDFillRoundFlatIconButton:
+						id: bt_up
+						icon: "home"
+						text: "HOME"
+						font_size: 28
+						size_hint: 0.8, 0.3
+						on_press: root.act_home()
+
+					MDFillRoundFlatIconButton:
+						id: bt_up
+						icon: "arrow-up"
+						text: "UP"
+						font_size: 28
+						size_hint: 0.8, 0.3
+						on_press: root.act_up()
+						on_release: root.act_stop()
+
+					MDFillRoundFlatIconButton:
+						id: bt_down
+						icon: "arrow-down"
+						text: "DOWN"
+						font_size: 28
+						size_hint: 0.8, 0.3
+						on_press: root.act_down()
+						on_release: root.act_stop()
+
+				MDBoxLayout:
+					orientation: 'vertical'
+					size_hint_x: 0.5
+					padding: 50
+					spacing: 20
+
+					MDBoxLayout:
+						orientation: 'horizontal'	
+
+						MDTextField:
+							id: tx_field
+							hint_text: "Masukkan Posisi yang Dituju"
+							text: "0.0"
+							font_size: 200
+							size_hint: 0.7, 0.8
+							input_filter: 'float'
+							on_text_validate: root.act_start()			
+
+						MDLabel:
+							text: "mm"
+							font_size: 100
+							size_hint: 0.3, 0.8
+							theme_text_color: "Custom"
+							text_color: app.theme_cls.primary_color
+							
+					MDFillRoundFlatIconButton:
+						id: bt_start
+						icon: "play"
+						text: "START"
+						font_size: 28
+						size_hint: 0.8, 0.3
+						on_press: root.act_start()
+

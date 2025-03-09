@@ -3,12 +3,11 @@ from kivy.lang import Builder
 from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager
 from kivymd.uix.screen import MDScreen
+from kivymd.uix.menu import MDDropdownMenu
 from kivymd.toast import toast
 from kivy.clock import Clock
 from kivy.properties import ObjectProperty
-from kivy.properties import StringProperty
-import time
-import requests
+import time, serial, serial.tools.list_ports
 
 colors = {
     "Blue": {"200": "#EEEEFF","500": "#EEEEFF","700": "#EEEEFF",},
@@ -19,12 +18,6 @@ colors = {
 }
 
 DEBUG = True
-
-# modbus rtu communication paramater setup
-BAUDRATE = 9600
-BYTESIZES = 8
-STOPBITS = 1
-TIMEOUT = 0.5
 
 class ScreenSplash(MDScreen):
     screen_manager = ObjectProperty(None)
@@ -54,13 +47,58 @@ class ScreenHome(MDScreen):
 
     def __init__(self, **kwargs):
         super(ScreenHome, self).__init__(**kwargs)
-        Clock.schedule_interval(self.regular_check, 3)
+        # Clock.schedule_interval(self.regular_check, 3)
+        self.serial_connection = None
+        self.com_ports = []
+        self.selected_com_port = None
+        self.detect_com_ports()
 
-    def regular_check(self, *args):
-        global main_switch
+    def detect_com_ports(self):
+        # Get a list of available COM ports
+        self.com_ports = [port.device for port in serial.tools.list_ports.comports()]
+        print(f"Available COM ports: {self.com_ports}")
+        
+    # def regular_check(self, *args):
+    #     data = ser.readline().decode().strip()
+    #     print(data)
+
+    def open_com_port_menu(self):
+        # Create a dropdown menu for COM ports
+        menu_items = [
+            {
+                "text": port,
+                "viewclass": "OneLineListItem",
+                "on_release": lambda x=port: self.select_com_port(x),
+            }
+            for port in self.com_ports
+        ]
+        self.menu = MDDropdownMenu(
+            caller=self.ids.com_port_button,
+            items=menu_items,
+            width_mult=4,
+        )
+        self.menu.open()
+
+    def select_com_port(self, port):
+        # Set the selected COM port
+        self.selected_com_port = port
+        self.ids.com_port_button.text = port
+        self.menu.dismiss()
+        self.connect_serial()
+
+    def connect_serial(self):
+        if self.selected_com_port:
+            try:
+                self.serial_connection = serial.Serial(self.selected_com_port, 9600, timeout=1)
+                print(f"Connected to {self.selected_com_port}!")
+            except Exception as e:
+                print(f"Failed to connect to {self.selected_com_port}: {e}")
 
     def act_home(self):
-        toast(f"Mulai Pergerakan ke posisi Awal")
+        if self.serial_connection:
+            self.serial_connection.write("HOME\n".encode())
+            print("Sent home command.")        
+            toast(f"Mulai Pergerakan ke posisi Awal")
 
     def act_up(self):
         toast(f"Pergerakan Naik")
@@ -72,9 +110,12 @@ class ScreenHome(MDScreen):
         pass
 
     def act_start(self):
-        set_point = self.ids.tx_field.text
-        toast(f"Mulai Pergerakan ke posisi {set_point} mm")
-
+        if self.serial_connection:
+            set_point = self.ids.tx_field.text
+            if set_point:
+                self.serial_connection.write(f"{set_point}\n".encode())
+                print(f"Sent position: {set_point}")
+                toast(f"Mulai Pergerakan ke posisi {set_point} mm")
 
 class RootScreen(ScreenManager):
     pass    
