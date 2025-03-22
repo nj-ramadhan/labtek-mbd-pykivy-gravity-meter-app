@@ -22,7 +22,7 @@
                     
             Image:
                 id: logo
-                source:'asset/Logo_Main.png'
+                source:'assets/images/Logo_Main.png'
                 size_hint_x: 0.25
                 allow_stretch: True                   
 
@@ -57,12 +57,14 @@
 				spacing: 20
 
 				MDLabel:
-					text: "Select COM Port:"
+					text: "Select Device:"
+					font_size: 32
 					size_hint_x: 0.7
 
 				MDRaisedButton:
 					id: com_port_button
-					text: "Select COM Port"
+					text: "Select Device"
+					font_size: 32
 					size_hint_x: 0.3
 					on_release: root.open_com_port_menu()
 
@@ -116,7 +118,7 @@
 							id: tx_field
 							hint_text: "Masukkan Posisi yang Dituju"
 							text: "0.0"
-							font_size: 200
+							font_size: 120
 							size_hint: 0.7, 0.8
 							input_filter: 'float'
 							on_text_validate: root.act_start()			
