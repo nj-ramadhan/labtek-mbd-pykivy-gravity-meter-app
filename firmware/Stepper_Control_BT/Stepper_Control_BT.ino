@@ -21,7 +21,7 @@ bool manual_dn = false; // Flag to indicate manual down
 void setup() {
   // Initialize serial communication
   Serial.begin(9600);
-  while (!Serial);
+  // while (!Serial);
 
   // Initialize BLE
   if (!BLE.begin()) {
@@ -66,24 +66,32 @@ void loop() {
       // Check if the command characteristic has been written to
       if (commandCharacteristic.written()) {
         serialInput = commandCharacteristic.value(); // Read the incoming data
+        desiredPosition = serialInput.toInt();
         Serial.print("Received command: ");
         Serial.println(serialInput);
         // If the incoming character is a newline, process the input
         // if (incomingChar == '\n') {
-          if (serialInput == "HOME") {
+          if (serialInput == "HOME\n") {
             // Start homing process
             homing = true;
+            Serial.print("Homing: ");
+            Serial.println(homing);
             stepper.setSpeed(1000); // Move backward at a constant speed
-          } else if (serialInput == "UP") {
+          } else if (serialInput == "UP\n") {
             // Start manual up process
             manual_up = true;
+            Serial.print("Manual Up: ");
+            Serial.println(manual_up);            
             stepper.setSpeed(-1000); // Move forward at a constant speed
-          } else if (serialInput == "DN") {
+          } else if (serialInput == "DN\n") {
             // Start manual down process
             manual_dn = true;
+            Serial.print("Manual Down: ");
+            Serial.println(manual_dn);    
             stepper.setSpeed(1000); // Move backward at a constant speed
-          } else {
-            desiredPosition = serialInput.toInt(); // Convert the string to an integer
+          } else if (desiredPosition > 0) {
+            Serial.print("Desired Pos: ");
+            Serial.println(desiredPosition);               
             stepper.moveTo(-desiredPosition); // Move the stepper to the desired position
           }
         //   serialInput = ""; // Clear the input string
@@ -104,12 +112,12 @@ void loop() {
         }
       } else if (manual_up) {
           stepper.setCurrentPosition(0);
-          stepper.moveTo(-1000);
+          stepper.moveTo(-2000);
           stepper.run(); // moving forward
           manual_up = false;
       } else if (manual_dn) {
           stepper.setCurrentPosition(0);
-          stepper.moveTo(1000);
+          stepper.moveTo(2000);
           stepper.run(); // moving backward
           manual_dn = false;
       } else {

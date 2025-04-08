@@ -68,12 +68,12 @@ void loop() {
     }
   } else if (manual_up) {
       stepper.setCurrentPosition(0);
-      stepper.moveTo(-1000);
+      stepper.moveTo(-2000);
       stepper.run(); // moving forward
       manual_up = false;
   } else if (manual_dn) {
       stepper.setCurrentPosition(0);
-      stepper.moveTo(1000);
+      stepper.moveTo(2000);
       stepper.run(); // moving backward
       manual_dn = false;
   } else {

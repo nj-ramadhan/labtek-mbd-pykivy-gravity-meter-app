@@ -105,13 +105,13 @@ class ScreenHome(MDScreen):
     def act_up(self):
         if self.serial_connection:
             self.serial_connection.write("UP\n".encode())
-            print("Sent home command.")        
+            print("Sent up command.")        
             toast(f"Mulai Pergerakan Naik Manual")
 
     def act_down(self):
         if self.serial_connection:
             self.serial_connection.write("DN\n".encode())
-            print("Sent home command.")        
+            print("Sent down command.")        
             toast(f"Mulai Pergerakan Turun Manual")
 
     def act_stop(self):

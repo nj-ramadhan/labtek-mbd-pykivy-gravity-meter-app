@@ -15,10 +15,10 @@ source.dir = .
 source.main = main.py
 
 # (str) Application version
-version = 1.1
+version = 1.3
 
 # (str) Supported orientation (one of: landscape, portrait, all)
-orientation = landscape
+orientation = portrait
 
 # (list) Permissions required by the app
 android.permissions = BLUETOOTH, BLUETOOTH_ADMIN, BLUETOOTH_CONNECT, BLUETOOTH_SCAN, INTERNET, ACCESS_FINE_LOCATION
@@ -30,7 +30,7 @@ icon.filename = assets/images/Logo_Main.png
 source.include_exts = py, kv, png, jpg, jpeg, gif
 
 # (list) Requirements for the app (Python modules, libraries)
-requirements = python3, kivy, kivymd, bleak, typing_extensions, pyjnius
+requirements = python3, kivy, kivymd, bleak, typing_extensions, pyjnius, android
 
 # (str) Presplash image
 presplash.filename = assets/images/Logo_Main.png

@@ -12,7 +12,7 @@ from kivy.logger import Logger
 from kivy.utils import platform
 import asyncio, threading
 from bleak import BleakClient, BleakScanner
-from jnius import autoclass, PythonJavaClass, java_method, cast
+from jnius import autoclass, cast
 
 # Define BLE UUIDs (must match the Arduino code)
 BLE_SERVICE_UUID = "19B10000-E8F2-537E-4F6C-D104768A1214"
@@ -51,82 +51,17 @@ class ScreenSplash(MDScreen):
             Clock.unschedule(self.update_progress_bar)
             return False
 
-class ScanCallback(PythonJavaClass):
-    __javainterfaces__ = ['android/bluetooth/le/ScanCallback']
-
-    def __init__(self, screen_home):
-        super().__init__()
-        self.screen_home = screen_home
-
-    @java_method('(ILjava/util/List;Landroid/bluetooth/le/ScanResult;)V')
-    def onScanResult(self, callbackType, result):
-        """Called when a BLE device is found."""
-        device = result.getDevice()
-        name = device.getName()
-        address = device.getAddress()
-        self.screen_home.add_ble_device(name, address)
-
-    @java_method('(I)V')
-    def onScanFailed(self, errorCode):
-        """Called when the scan fails."""
-        Logger.error(f"BLE: Scan failed with error code {errorCode}")
-        self.screen_home.show_toast(f"BLE scan failed: {errorCode}")
-
-
 class ScreenHome(MDScreen):
     def __init__(self, **kwargs):
         super(ScreenHome, self).__init__(**kwargs)
         self.ble_client = None
-        self.ble_service = None
         self.ble_devices = []
         self.selected_device = None
 
     def detect_ble_devices(self):
-        """Start BLE scanning."""
-        self.ble_devices = []  # Clear the list of devices
-        if platform == "android":
-            threading.Thread(target=self._start_ble_scan_android).start()
-        elif platform in ("win", "linux", "macosx"):
-            threading.Thread(target=self._start_ble_scan_desktop).start()
+        threading.Thread(target=self._detect_ble_devices).start()
 
-    def _start_ble_scan_android(self):
-        """Perform BLE scanning using Android's BluetoothLeScanner."""
-        try:
-            BluetoothAdapter = autoclass('android.bluetooth.BluetoothAdapter')
-            BluetoothManager = autoclass('android.bluetooth.BluetoothManager')
-            PythonActivity = autoclass('org.kivy.android.PythonActivity')
-
-            # Get the Bluetooth adapter
-            activity = PythonActivity.mActivity
-            context = activity.getApplicationContext()
-            bluetooth_manager = cast(BluetoothManager, context.getSystemService("bluetooth"))
-            bluetooth_adapter = bluetooth_manager.getAdapter()
-
-            if not bluetooth_adapter.isEnabled():
-                Logger.error("BLE: Bluetooth is not enabled.")
-                self.show_toast("Please enable Bluetooth.")
-                return
-
-            # Get the BluetoothLeScanner
-            bluetooth_le_scanner = bluetooth_adapter.getBluetoothLeScanner()
-            if not bluetooth_le_scanner:
-                Logger.error("BLE: Bluetooth LE Scanner is not available.")
-                self.show_toast("BLE Scanner not available.")
-                return
-
-            # Start scanning
-            self.scan_callback = ScanCallback(self)
-            Logger.info("BLE: Starting BLE scan...")
-            bluetooth_le_scanner.startScan(None, self.scan_callback)
-
-            # Stop scanning after 10 seconds
-            Clock.schedule_once(lambda dt: bluetooth_le_scanner.stopScan(None), 10)
-
-        except Exception as e:
-            Logger.error(f"BLE: Failed to scan for devices: {e}")
-            self.show_toast("Failed to scan for BLE devices.")
-
-    def _start_ble_scan_desktop(self):
+    def _detect_ble_devices(self):
         async def scan():
             try:
                 self.ble_devices = await BleakScanner.discover()
@@ -139,17 +74,7 @@ class ScreenHome(MDScreen):
         asyncio.run(scan())
 
     @mainthread
-    def add_ble_device(self, name, address):
-        """Add a BLE device to the list."""
-        if name is None:
-            name = "Unknown Device"
-        self.ble_devices.append({"name": name, "address": address})
-        Logger.info(f"BLE: Adding device - Name: {name}, Address: {address}")
-
-    @mainthread
     def update_ble_devices_menu(self):
-        """Update the dropdown menu with the scanned BLE devices."""
-        Logger.info(f"BLE: Updating dropdown menu with {len(self.ble_devices)} devices")
         menu_items = [
             {
                 "text": device.name if device.name else device.address,
@@ -167,18 +92,17 @@ class ScreenHome(MDScreen):
 
     @mainthread
     def show_toast(self, message):
-        """Show a toast message."""
         toast(message)
 
     def open_com_port_menu(self):
         self.detect_ble_devices()
         self.show_toast("Scanning for BLE devices...")
-        
+
     def select_ble_device(self, device):
-        """Handle BLE device selection."""
         self.selected_device = device
         self.ids.com_port_button.text = device.name if device.name else device.address
         self.menu.dismiss()
+        self.connect_ble()
 
     def connect_ble(self):
         if self.selected_device:
@@ -265,12 +189,9 @@ class GravityMeterApp(MDApp):
         self.theme_cls.primary_palette = "BlueGray"
         self.theme_cls.accent_palette = "Blue"
         self.icon = 'asset/Logo_Main.png'
-        Window.allow_screensaver = True
-        # Window.size = (1366, 768)
-        # Window.size = (480, 1280)
         Window.fullscreen = 'auto'
         Window.borderless = True
-        
+        Window.allow_screensaver = True
 
         Builder.load_file('main.kv')
         return RootScreen()

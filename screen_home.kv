@@ -71,12 +71,11 @@
 			MDBoxLayout:
 				orientation: 'horizontal'
 				size_hint: 1, 0.9
-				padding: 50
 
 				MDBoxLayout:
 					orientation: 'vertical'
 					size_hint_x: 0.5
-					padding: 50
+					padding: 20
 					spacing: 20
 
 					MDFillRoundFlatIconButton:
@@ -84,7 +83,8 @@
 						icon: "home"
 						text: "HOME"
 						font_size: 28
-						size_hint: 0.8, 0.3
+						size_hint_x: 0.8
+						size_hint_y: 0.3 if root.width > root.height else 0.2
 						on_press: root.act_home()
 
 					MDFillRoundFlatIconButton:
@@ -92,7 +92,8 @@
 						icon: "arrow-up"
 						text: "UP"
 						font_size: 28
-						size_hint: 0.8, 0.3
+						size_hint_x: 0.8
+						size_hint_y: 0.3 if root.width > root.height else 0.2
 						on_press: root.act_up()
 						on_release: root.act_stop()
 
@@ -101,32 +102,38 @@
 						icon: "arrow-down"
 						text: "DOWN"
 						font_size: 28
-						size_hint: 0.8, 0.3
+						size_hint_x: 0.8
+						size_hint_y: 0.3 if root.width > root.height else 0.2
 						on_press: root.act_down()
 						on_release: root.act_stop()
 
+					MDBoxLayout:
+						orientation: 'vertical'
+						size_hint_y: 0.1 if root.width > root.height else 0.4
+						
 				MDBoxLayout:
 					orientation: 'vertical'
 					size_hint_x: 0.5
-					padding: 50
+					padding: 20
 					spacing: 20
 
 					MDBoxLayout:
 						orientation: 'horizontal'	
+						size_hint_y: 0.6 if root.width > root.height else 0.4
 
 						MDTextField:
 							id: tx_field
 							hint_text: "Masukkan Posisi yang Dituju"
 							text: "0.0"
 							font_size: 120
-							size_hint: 0.7, 0.8
+							size_hint_x: 0.7
 							input_filter: 'float'
 							on_text_validate: root.act_start()			
 
 						MDLabel:
 							text: "mm"
-							font_size: 100
-							size_hint: 0.3, 0.8
+							font_size: 60
+							size_hint_x: 0.3
 							theme_text_color: "Custom"
 							text_color: app.theme_cls.primary_color
 							
@@ -135,6 +142,11 @@
 						icon: "play"
 						text: "START"
 						font_size: 28
-						size_hint: 0.8, 0.3
+						size_hint_x: 0.8
+						size_hint_y: 0.3 if root.width > root.height else 0.2
 						on_press: root.act_start()
+
+					MDBoxLayout:
+						orientation: 'vertical'
+						size_hint_y: 0.1 if root.width > root.height else 0.4
 
