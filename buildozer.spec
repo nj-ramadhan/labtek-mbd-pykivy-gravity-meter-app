@@ -3,7 +3,7 @@
 title = Gravity Meter App
 
 # (str) Package name
-package.name = gravitymeter
+package.name = unt_gravitymeter
 
 # (str) Package domain (unique, usually your reverse domain)
 package.domain = com.unt_gravitymeter
@@ -27,10 +27,10 @@ android.permissions = BLUETOOTH, BLUETOOTH_ADMIN, BLUETOOTH_CONNECT, BLUETOOTH_S
 icon.filename = assets/images/Logo_Main.png
 
 # (list) Additional source files to include (e.g., .kv files)
-source.include_exts = py, kv, png, jpg, jpeg, gif
+source.include_exts = py, kv, png, jpg, jpeg, gif, java
 
 # (list) Requirements for the app (Python modules, libraries)
-requirements = python3, kivy, kivymd, bleak, typing_extensions, pyjnius, android
+requirements = python3, kivy, kivymd, bleak, typing_extensions, android
 
 # (str) Presplash image
 presplash.filename = assets/images/Logo_Main.png
@@ -49,6 +49,9 @@ android.ndk = 25c
 
 # (str) Android architecture to support
 android.archs = arm64-v8a, armeabi-v7a
+
+# (str) Directory containing Java source files
+android.add_src = src/main/java
 
 # (bool) Enable Android logcat output
 log_level = 2

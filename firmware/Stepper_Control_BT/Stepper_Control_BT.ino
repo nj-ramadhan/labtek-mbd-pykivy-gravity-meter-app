@@ -11,12 +11,22 @@ AccelStepper stepper(AccelStepper::DRIVER, STEP_PIN, DIR_PIN);
 
 BLEService stepperService("19B10000-E8F2-537E-4F6C-D104768A1214"); // Custom UUID
 BLEStringCharacteristic commandCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite, 20); // Max 20 bytes
+
 // Variables to store the desired position and serial input
 long desiredPosition = 0;
 String serialInput = "";
-bool homing = false; // Flag to indicate homing process
-bool manual_up = false; // Flag to indicate manual up
-bool manual_dn = false; // Flag to indicate manual down
+
+bool manualUp = false;          // Flag to indicate manual up
+bool manualDown = false;        // Flag to indicate manual down
+
+bool homingCommand = false;     // Flag to indicate homing process
+bool homingComplete = false;    // the current state of the output pin
+
+int buttonState;            // the current reading from the input pin
+int lastButtonState = LOW;  // the previous reading from the input pin
+
+unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
+unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
 
 void setup() {
   // Initialize serial communication
@@ -69,57 +79,77 @@ void loop() {
         desiredPosition = serialInput.toInt();
         Serial.print("Received command: ");
         Serial.println(serialInput);
-        // If the incoming character is a newline, process the input
-        // if (incomingChar == '\n') {
-          if (serialInput == "HOME\n") {
-            // Start homing process
-            homing = true;
-            Serial.print("Homing: ");
-            Serial.println(homing);
-            stepper.setSpeed(1000); // Move backward at a constant speed
-          } else if (serialInput == "UP\n") {
-            // Start manual up process
-            manual_up = true;
-            Serial.print("Manual Up: ");
-            Serial.println(manual_up);            
-            stepper.setSpeed(-1000); // Move forward at a constant speed
-          } else if (serialInput == "DN\n") {
-            // Start manual down process
-            manual_dn = true;
-            Serial.print("Manual Down: ");
-            Serial.println(manual_dn);    
-            stepper.setSpeed(1000); // Move backward at a constant speed
-          } else if (desiredPosition > 0) {
-            Serial.print("Desired Pos: ");
-            Serial.println(desiredPosition);               
-            stepper.moveTo(-desiredPosition); // Move the stepper to the desired position
-          }
-        //   serialInput = ""; // Clear the input string
-        // } else {
-        //   serialInput += incomingChar; // Append the character to the input string
-        // }
+      
+        if (serialInput == "HOME\n") {
+          // Start homing process
+          homingCommand = true;
+          Serial.print("Homing: ");
+          Serial.println(homingCommand);
+          stepper.setSpeed(1000); // Move backward at a constant speed
+        } else if (serialInput == "UP\n") {
+          // Start manual up process
+          manualUp = true;
+          Serial.print("Manual Up: ");
+          Serial.println(manualUp);            
+          stepper.setSpeed(-1000); // Move forward at a constant speed
+        } else if (serialInput == "DN\n") {
+          // Start manual down process
+          manualDown = true;
+          Serial.print("Manual Down: ");
+          Serial.println(manualDown);    
+          stepper.setSpeed(1000); // Move backward at a constant speed
+        } else if (desiredPosition > 0) {
+          Serial.print("Desired Pos: ");
+          Serial.println(desiredPosition);               
+          stepper.moveTo(-desiredPosition); // Move the stepper to the desired position
+        }
       }
 
+      int reading = digitalRead(LIMIT_SWITCH_PIN);
+      // If the switch changed, due to noise or pressing:
+      if (reading != lastButtonState) {
+        // reset the debouncing timer
+        lastDebounceTime = millis();
+      }
+
+      if ((millis() - lastDebounceTime) > debounceDelay) {
+        // whatever the reading is at, it's been there for longer than the debounce
+        // delay, so take it as the actual current state:
+
+        // if the button state has changed:
+        if (reading != buttonState) {
+          buttonState = reading;
+
+          if (buttonState == LOW) {
+            homingComplete = true;
+          }
+          else{
+            homingComplete = false;
+          }
+        }
+      }
+      lastButtonState = reading;
+
       // Homing process
-      if (homing) {
-        if (digitalRead(LIMIT_SWITCH_PIN) == LOW) { // Limit switch is pressed (LOW because of pull-up)
+      if (homingCommand) {
+        if (homingComplete) { // Limit switch is pressed (LOW because of pull-up)
           stepper.setCurrentPosition(0); // Set the current position as 0
           stepper.stop(); // Stop the motor
-          homing = false; // End homing process
+          homingCommand = false; // End homing process
           Serial.println("Homing complete. Position set to 0.");
         } else {
           stepper.runSpeed(); // Continue moving backward
         }
-      } else if (manual_up) {
+      } else if (manualUp) {
           stepper.setCurrentPosition(0);
           stepper.moveTo(-2000);
           stepper.run(); // moving forward
-          manual_up = false;
-      } else if (manual_dn) {
+          manualUp = false;
+      } else if (manualDown) {
           stepper.setCurrentPosition(0);
           stepper.moveTo(2000);
           stepper.run(); // moving backward
-          manual_dn = false;
+          manualDown = false;
       } else {
         // Run the stepper motor to the desired position
         stepper.run();
